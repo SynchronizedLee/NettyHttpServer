@@ -1,6 +1,7 @@
 package pri.liyang.handler;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -11,13 +12,16 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import io.netty.util.CharsetUtil;
 import net.sf.json.JSONObject;
+import pri.liyang.entity.Response;
+import pri.liyang.inter.BaseController;
+import pri.liyang.util.CacheUtils;
+import pri.liyang.util.ConstantUtils;
+import pri.liyang.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.netty.buffer.Unpooled.copiedBuffer;
 
 public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -26,26 +30,43 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
      */
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, FullHttpRequest fullHttpRequest) {
-        //System.out.println(fullHttpRequest);
-
-        FullHttpResponse response = null;
-        if (fullHttpRequest.method() == HttpMethod.GET) {
-            System.out.println(getGetParamsFromChannel(fullHttpRequest));
-            String data = "GET method over";
-            ByteBuf buf = copiedBuffer(data, CharsetUtil.UTF_8);
-            response = responseOK(HttpResponseStatus.OK, buf);
-
-        } else if (fullHttpRequest.method() == HttpMethod.POST) {
-            System.out.println(getPostParamsFromChannel(fullHttpRequest));
-            String data = "POST method over";
-            ByteBuf content = copiedBuffer(data, CharsetUtil.UTF_8);
-            response = responseOK(HttpResponseStatus.OK, content);
-
-        } else {
-            response = responseOK(HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
+        if (UriUtils.isInBlackList(fullHttpRequest.uri())) {
+            FullHttpResponse httpResponse = createHttpResponse(Response.fail("Illegal uri: " + fullHttpRequest.uri()));
+            channelHandlerContext.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+            return;
         }
+
+        String classpath = ConstantUtils.CLASSPATH_PREFIX +
+                UriUtils.parseUri(fullHttpRequest.uri()) +
+                ConstantUtils.CLASSPATH_SUFFIX;
+
+        BaseController controller = null;
+        Response response = null;
+
+        try {
+            controller = CacheUtils.getControllerInstance(classpath);
+        } catch (Exception e) {
+            FullHttpResponse httpResponse = createHttpResponse(Response.fail("Controller instantiation error: " + e.toString()));
+            channelHandlerContext.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+            return;
+        }
+
+        try {
+            if (fullHttpRequest.method() == HttpMethod.GET) {
+                Map<String, Object> param = getGetParamsFromChannel(fullHttpRequest);
+                response = controller.handleGetRequest(param);
+            } else if (fullHttpRequest.method() == HttpMethod.POST) {
+                Map<String, Object> param = getPostParamsFromChannel(fullHttpRequest);
+                response = controller.handlePostRequest(param);
+            }
+
+        } catch (Exception e) {
+            response = Response.fail("Internal Server Error: " + e.toString());
+        }
+
         // 发送响应
-        channelHandlerContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        FullHttpResponse httpResponse = createHttpResponse(response);
+        channelHandlerContext.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
     }
 
     /*
@@ -134,13 +155,21 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         return params;
     }
 
-    private FullHttpResponse responseOK(HttpResponseStatus status, ByteBuf content) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, content);
-        if (content != null) {
-            response.headers().set("Content-Type", "text/plain;charset=UTF-8");
-            response.headers().set("Content_Length", response.content().readableBytes());
+    private FullHttpResponse createHttpResponse(Response response) {
+        HttpVersion httpVersion = HttpVersion.HTTP_1_1;
+        ByteBuf content = Unpooled.copiedBuffer(JSONObject.fromObject(response).toString(), CharsetUtil.UTF_8);
+        HttpResponseStatus httpResponseStatus = null;
+
+        if (response.getCode() == 200) {
+            httpResponseStatus = HttpResponseStatus.OK;
+        } else {
+            httpResponseStatus = HttpResponseStatus.INTERNAL_SERVER_ERROR;
         }
-        return response;
+
+        FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(httpVersion, httpResponseStatus, content);
+        fullHttpResponse.headers().set("Content-Type", "application/json;charset=UTF-8");
+        fullHttpResponse.headers().set("Content_Length", fullHttpResponse.content().readableBytes());
+        return fullHttpResponse;
     }
 
 }

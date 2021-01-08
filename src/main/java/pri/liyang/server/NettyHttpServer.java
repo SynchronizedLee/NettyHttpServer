@@ -27,12 +27,12 @@ public class NettyHttpServer {
     }
 
     public void init() throws Exception {
-        EventLoopGroup parentGroup = new NioEventLoopGroup();
-        EventLoopGroup childGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         try {
             ServerBootstrap server = new ServerBootstrap();
-            server.group(parentGroup, childGroup)
+            server.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -51,8 +51,8 @@ public class NettyHttpServer {
             ChannelFuture future = server.bind(this.inetPort).sync();
             future.channel().closeFuture().sync();
         } finally {
-            childGroup.shutdownGracefully();
-            parentGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
         }
     }
 

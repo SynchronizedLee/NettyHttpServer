@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class UriUtils {
 
-    private static Set<String> uriBlackList = new HashSet<>();
+    private static final Set<String> uriBlackList = new HashSet<>();
 
     static {
         uriBlackList.add("/favicon.ico");

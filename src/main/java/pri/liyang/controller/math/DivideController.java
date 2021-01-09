@@ -25,7 +25,7 @@ public class DivideController implements BaseController {
         BigDecimal first = new BigDecimal(param.get("first").toString());
         BigDecimal second = new BigDecimal(param.get("second").toString());
         BigDecimal result = first.divide(second, scale, RoundingMode.HALF_UP);
-        return Response.successWithData("success counted", result.doubleValue());
+        return Response.successWithData("success counted", result.toString());
     }
 
     @Override

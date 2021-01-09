@@ -6,6 +6,8 @@ public class Response {
     private String message;
     private Object data;
 
+    private static final String DEFAULT_SUCCESS_MESSAGE = "success";
+
     public Integer getCode() {
         return code;
     }
@@ -39,6 +41,10 @@ public class Response {
 
     public static Response successWithData(String message, Object data) {
         return new Response().setCode(200).setMessage(message).setData(data);
+    }
+
+    public static Response successOnlyData(Object data) {
+        return new Response().setCode(200).setMessage(DEFAULT_SUCCESS_MESSAGE).setData(data);
     }
 
     public static Response fail(String message) {

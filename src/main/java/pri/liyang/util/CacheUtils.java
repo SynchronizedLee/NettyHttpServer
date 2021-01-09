@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheUtils {
 
-    private static Map<String, BaseController> controllerCache = new ConcurrentHashMap<>();
+    private static final Map<String, BaseController> controllerCache = new ConcurrentHashMap<>();
 
     public static BaseController getControllerInstance(String classpath) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         if (!controllerCache.containsKey(classpath)) {

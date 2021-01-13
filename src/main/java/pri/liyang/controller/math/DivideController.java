@@ -1,13 +1,13 @@
 package pri.liyang.controller.math;
 
 import pri.liyang.entity.Response;
-import pri.liyang.inter.BaseController;
+import pri.liyang.inter.ControllerAdapter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
-public class DivideController implements BaseController {
+public class DivideController extends ControllerAdapter {
 
     private static final Integer DEFAULT_SCALE = 6;
 
@@ -28,8 +28,4 @@ public class DivideController implements BaseController {
         return Response.successWithData("success counted", result.toString());
     }
 
-    @Override
-    public Response handlePostRequest(Map<String, Object> param) {
-        return null;
-    }
 }

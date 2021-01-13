@@ -2,12 +2,13 @@ package pri.liyang.controller.user;
 
 import pri.liyang.entity.Response;
 import pri.liyang.entity.User;
-import pri.liyang.inter.BaseController;
+import pri.liyang.inter.ControllerAdapter;
 import pri.liyang.repository.UserRepository;
 
 import java.util.Map;
 
-public class UserController implements BaseController {
+public class UserController extends ControllerAdapter {
+
     @Override
     public Response handleGetRequest(Map<String, Object> param) {
         if (!param.containsKey("operate")) {
@@ -36,8 +37,4 @@ public class UserController implements BaseController {
         }
     }
 
-    @Override
-    public Response handlePostRequest(Map<String, Object> param) {
-        return null;
-    }
 }

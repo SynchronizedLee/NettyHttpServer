@@ -10,4 +10,8 @@ public interface BaseController {
 
     Response handlePostRequest(Map<String, Object> param);
 
+    Response handlePutRequest(Map<String, Object> param);
+
+    Response handleDeleteRequest(Map<String, Object> param);
+
 }

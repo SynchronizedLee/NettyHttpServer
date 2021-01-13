@@ -1,12 +1,13 @@
 package pri.liyang.controller.math;
 
 import pri.liyang.entity.Response;
-import pri.liyang.inter.BaseController;
+import pri.liyang.inter.ControllerAdapter;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
-public class SubtractController implements BaseController {
+public class SubtractController extends ControllerAdapter {
+
     @Override
     public Response handleGetRequest(Map<String, Object> param) {
         BigDecimal first = new BigDecimal(param.get("first").toString());
@@ -15,8 +16,4 @@ public class SubtractController implements BaseController {
         return Response.successWithData("success counted", result.doubleValue());
     }
 
-    @Override
-    public Response handlePostRequest(Map<String, Object> param) {
-        return null;
-    }
 }

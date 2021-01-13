@@ -1,0 +1,13 @@
+http://localhost:8888/math/Add?first=3.5&second=2.3
+http://localhost:8888/math/Subtract?first=3.5&second=2.3
+http://localhost:8888/math/Multi?first=7.651&second=8.287
+http://localhost:8888/math/Divide?first=355&second=113
+http://localhost:8888/math/Divide?first=355&second=113&scale=30
+
+http://localhost:8888/time/Time
+
+http://localhost:8888/user/User?operate=all
+http://localhost:8888/user/User?operate=one&id=1
+http://localhost:8888/user/User?operate=add&age=59&username=product&password=123456&address=chengdu&salary=12000
+http://localhost:8888/user/User?operate=update&age=56&username=develop&password=123456&address=chengdu&salary=16000&id=1
+http://localhost:8888/user/User?operate=delete&id=1

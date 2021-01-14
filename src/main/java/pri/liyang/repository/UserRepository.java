@@ -3,6 +3,7 @@ package pri.liyang.repository;
 import pri.liyang.entity.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,6 +20,7 @@ public class UserRepository {
     }
 
     public static List<User> getAllUser() {
+        Collections.sort(userList);
         return userList;
     }
 

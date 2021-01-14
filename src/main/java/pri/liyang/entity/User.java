@@ -2,7 +2,7 @@ package pri.liyang.entity;
 
 import java.util.Map;
 
-public class User {
+public class User implements Comparable<User> {
 
     private Integer id;
     private Integer age;
@@ -89,4 +89,10 @@ public class User {
 
         return user;
     }
+
+    @Override
+    public int compareTo(User o) {
+        return this.id - o.id;
+    }
+
 }
